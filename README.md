@@ -1,98 +1,128 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# TuitionLMS Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+TuitionLMS is a backend system for a learning platform built with NestJS, MongoDB, and Prisma. It is designed to manage students, teachers, courses, lessons, enrollments, quizzes, and admin activities in a structured way.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## What This Project Does
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This backend powers a complete learning system where:
 
-## Project setup
+- Users can register and login
+- Students can enroll in courses
+- Teachers/admin can create courses and lessons
+- Quizzes can be created and solved
+- Admin can manage everything from one place
+- Emails can be sent for important actions like password reset
 
-```bash
-$ npm install
-```
+---
 
-## Compile and run the project
+## Main Features
 
-```bash
-# development
-$ npm run start
+### Authentication
+- User registration and login
+- Secure JWT-based authentication
+- Role-based access (Admin, Student)
 
-# watch mode
-$ npm run start:dev
+### User Management
+- View and update user profile
+- Separate roles for different access levels
 
-# production mode
-$ npm run start:prod
-```
+### Course System
+- Create and manage courses
+- View all available courses
+- Update or delete courses
 
-## Run tests
+### Lesson System
+- Add lessons inside courses
+- Organize learning content properly
 
-```bash
-# unit tests
-$ npm run test
+### Enrollment System
+- Students can enroll in courses
+- Track enrolled courses per user
 
-# e2e tests
-$ npm run test:e2e
+### Quiz System
+- Create quizzes for courses
+- Students can attempt quizzes
+- Store and evaluate results
 
-# test coverage
-$ npm run test:cov
-```
+### Email System
+- Send emails for important actions
+- Used for password reset and notifications
 
-## Deployment
+### Admin Panel Support
+- Manage users
+- Manage courses and content
+- View system overview data
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Project Structure Overview
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+The project is divided into clean modules:
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- **Auth Module** → login, register, security
+- **User Module** → user profile and management
+- **Course Module** → course creation and management
+- **Lesson Module** → course content handling
+- **Enrollment Module** → student course enrollment
+- **Quiz Module** → exam and assessment system
+- **Mail Module** → email service handling
+- **Admin Module** → admin controls
+- **Common** → shared utilities like guards and decorators
+- **Prisma** → database connection and schema
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## Database Overview
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The system uses MongoDB with Prisma ORM.
 
-## Support
+Main data models:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- User → stores student and admin info
+- Course → stores course details
+- Lesson → stores course content
+- Enrollment → tracks student course joining
+- Quiz → stores questions and answers
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## System Flow
 
-## License
+1. User registers and logs in
+2. JWT token is generated for authentication
+3. Student browses courses
+4. Student enrolls in a course
+5. Lessons become accessible after enrollment
+6. Quizzes are attempted after lessons
+7. Admin manages all system data
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## API Structure
+
+The backend exposes APIs for:
+
+- Authentication (login/register)
+- Users (profile management)
+- Courses (create/read/update/delete)
+- Lessons (course content)
+- Enrollments (student joining system)
+- Quizzes (assessment system)
+
+---
+
+## Architecture Style
+
+- Modular architecture (each feature separated)
+- Clean code structure
+- Scalable service-based design
+- Reusable common utilities
+- Secure authentication flow
+
+---
+
+## Goal of This Project
+
+The goal of TuitionLMS backend is to simulate a real-world online learning platform where students and teachers can interact through courses, lessons, and assessments in a structured and scalable system.

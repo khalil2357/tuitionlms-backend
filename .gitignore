@@ -49,3 +49,4 @@ docker-compose.override.yml
 # optional docker volumes (if you mount local DB/cache)
 docker-data/
 data/
+/generated/prisma

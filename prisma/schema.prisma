@@ -9,24 +9,244 @@ datasource db {
 
 model User {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-
   name            String
   email           String   @unique
   password        String
-
   role            Role     @default(STUDENT)
-
   university      String?
   educationLevel  EducationLevel?
-
   avatar          String?
   phone           String?
-
+  bio             String?
+  headline        String?
   isActive        Boolean  @default(true)
   isVerified      Boolean  @default(false)
-
+  createdCourses  Course[]  @relation("Instructor")
+  reviewedCourses CourseReview[] @relation("Reviewer")
+  enrollments     Enrollment[]
+  quizResults     QuizResult[]
+  certificates    Certificate[]
+  courseProgress  CourseProgress[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model Category {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String   @unique
+  description     String?
+  icon            String?
+  slug            String   @unique
+  courses         Course[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Course {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String
+  shortDescription String?
+  slug            String   @unique
+  instructor      User     @relation("Instructor", fields: [instructorId], references: [id], onDelete: Cascade)
+  instructorId    String   @db.ObjectId
+  category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId      String   @db.ObjectId
+  thumbnail       String?
+  price           Float    @default(0)
+  discountPrice   Float?
+  currency        String   @default("USD")
+  level           CourseLevel @default(BEGINNER)
+  status          CourseStatus @default(DRAFT)
+  language        String   @default("en")
+  sections        Section[]
+  lessons         Lesson[]
+  enrollments     Enrollment[]
+  quizzes         Quiz[]
+  reviews         CourseReview[]
+  progress        CourseProgress[]
+  totalStudents   Int      @default(0)
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0)
+  isPublished     Boolean  @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([instructorId])
+  @@index([categoryId])
+  @@index([slug])
+}
+
+model Section {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String?
+  order           Int
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        String   @db.ObjectId
+  lessons         Lesson[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model Lesson {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String?
+  content         String
+  videoUrl        String?
+  duration        Int      @default(0)
+  order           Int
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        String   @db.ObjectId
+  section         Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId       String   @db.ObjectId
+  resources       LessonResource[]
+  isPreview       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([sectionId])
+}
+
+model LessonResource {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  fileUrl         String
+  fileType        String
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId        String   @db.ObjectId
+  createdAt       DateTime @default(now())
+
+  @@index([lessonId])
+}
+
+model Enrollment {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId       String   @db.ObjectId
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        String   @db.ObjectId
+  status          EnrollmentStatus @default(ACTIVE)
+  progress        Int      @default(0)
+  enrolledAt      DateTime @default(now())
+  completedAt     DateTime?
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+}
+
+model Quiz {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String?
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        String   @db.ObjectId
+  questions       Question[]
+  results         QuizResult[]
+  passingScore    Int      @default(70)
+  timeLimit       Int?
+  shuffleQuestions Boolean @default(false)
+  showCorrectAnswers Boolean @default(true)
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model Question {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId          String   @db.ObjectId
+  type            QuestionType @default(MULTIPLE_CHOICE)
+  questionText    String
+  order           Int
+  options         QuestionOption[]
+  correctAnswer   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([quizId])
+}
+
+model QuestionOption {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId      String   @db.ObjectId
+  text            String
+  order           Int
+
+  @@index([questionId])
+}
+
+model QuizResult {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId       String   @db.ObjectId
+  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId          String   @db.ObjectId
+  score           Int
+  percentage      Float
+  passed          Boolean
+  timeSpent       Int
+  answers         String
+  completedAt     DateTime @default(now())
+
+  @@index([studentId])
+  @@index([quizId])
+}
+
+model CourseReview {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        String   @db.ObjectId
+  reviewer        User     @relation("Reviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewerId      String   @db.ObjectId
+  rating          Int
+  title           String
+  comment         String?
+  helpful         Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([courseId, reviewerId])
+  @@index([courseId])
+  @@index([reviewerId])
+}
+
+model CourseProgress {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId       String   @db.ObjectId
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        String   @db.ObjectId
+  lessonsCompleted Int     @default(0)
+  totalLessons    Int
+  percentage      Float    @default(0)
+  currentLessonId String?
+  lastAccessedAt  DateTime @default(now())
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+}
+
+model Certificate {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId       String   @db.ObjectId
+  courseName      String
+  certificateUrl  String
+  issuedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  @@index([studentId])
 }
 
 enum Role {
@@ -41,4 +261,30 @@ enum EducationLevel {
   BACHELORS
   MASTERS
   PHD
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+  SUSPENDED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+  ESSAY
 }

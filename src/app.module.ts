@@ -15,10 +15,11 @@ import { QuizModule } from './quiz/quiz.module';
 import { QuizResultModule } from './quiz-result/quiz-result.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { CertificateModule } from './certificate/certificate.module';
+import { InstructorModule } from './instructor/instructor.module';
 
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, CoursesModule, LessonsModule, EnrollmentsModule, MailModule, AdminModule, ProgressModule, QuizModule, QuizResultModule, ReviewsModule, CertificateModule],
+  imports: [PrismaModule, AuthModule, UsersModule, CoursesModule, LessonsModule, EnrollmentsModule, MailModule, AdminModule, ProgressModule, QuizModule, QuizResultModule, ReviewsModule, CertificateModule, InstructorModule],
   controllers: [AppController],
   providers: [AppService],
 })

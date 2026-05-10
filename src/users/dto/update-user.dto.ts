@@ -1,4 +1,5 @@
 import { ApiOAuth2, ApiProperty } from "@nestjs/swagger";
+import { EducationLevel } from "@prisma/client";
 import { IsString } from "class-validator";
 import { IsOptional } from "class-validator/types/decorator/common/IsOptional";
 export class UpdateUserDto {
@@ -16,7 +17,7 @@ export class UpdateUserDto {
     @ApiProperty({ description: 'Education level', example: 'BACHELORS', required: false, enum: ['HIGH_SCHOOL', 'DIPLOMA', 'BACHELORS', 'MASTERS', 'PHD'] })
     @IsOptional()
     @IsString()
-    educationLevel?: string;
+    educationLevel?: EducationLevel;
 
     @ApiProperty({description: 'Avatar URL', example: 'https://example.com/avatar.jpg', required: false})
     @IsOptional()

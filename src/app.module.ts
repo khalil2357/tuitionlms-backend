@@ -11,9 +11,10 @@ import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
 import { MailModule } from './mail/mail.module';
 import { AdminModule } from './admin/admin.module';
+import { ProgressModule } from './progress/progress.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, CoursesModule, LessonsModule, EnrollmentsModule, QuizzesModule, MailModule, AdminModule],
+  imports: [PrismaModule, AuthModule, UsersModule, CoursesModule, LessonsModule, EnrollmentsModule, QuizzesModule, MailModule, AdminModule, ProgressModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,5 +1,6 @@
-import { ApiOAuth2, ApiProperty } from "@nestjs/swagger";
+import { ApiOAuth2} from "@nestjs/swagger";
 import { EducationLevel } from "@prisma/client";
+import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
 import { IsOptional } from "class-validator/types/decorator/common/IsOptional";
 export class UpdateUserDto {

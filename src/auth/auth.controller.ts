@@ -12,7 +12,6 @@ export class AuthController {
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
     @ApiResponse({ status: 201, description: 'User registered successfully' })
-    @ApiResponse({ status: 400, description: 'Invalid input' })
     async register(@Body() body: RegisterDto){
         return this.authService.register(body);
     }
@@ -20,7 +19,6 @@ export class AuthController {
     @Post('login')
     @ApiOperation({ summary: 'User login' })
     @ApiResponse({ status: 200, description: 'Login successful, returns access token' })
-    @ApiResponse({ status: 401, description: 'Invalid credentials' })
     async login(@Body() body: LoginDto){
         return this.authService.login(body);
     }

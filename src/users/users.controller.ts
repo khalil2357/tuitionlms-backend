@@ -8,12 +8,16 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
     @UseGuards(JwtAuthGuard)
     @Get('profile')
+    @ApiOperation({ summary: 'Get user profile' })
+    @ApiResponse({ status: 200, description: 'Returns the user profile' })
     getProfile(@Req() req) {
         return this.usersService.getProfile(req.user.id);
     }
 
     @UseGuards(JwtAuthGuard)
     @Patch('update')
+    @ApiOperation({ summary: 'Update user profile' })
+    @ApiResponse({ status: 200, description: 'User profile updated successfully' })
     UpdateUser(
         @Req() req: any,
         @Body() payload: any
@@ -22,6 +26,8 @@ export class UsersController {
     }
     @UseGuards(JwtAuthGuard)
     @Get('all')
+    @ApiOperation({ summary: 'Get all users' })
+    @ApiResponse({ status: 200, description: 'Returns a list of all users' })
     getAllUsers(){
         return this.usersService.getAllUsers();
     }

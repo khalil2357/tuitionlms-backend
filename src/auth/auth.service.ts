@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
@@ -19,12 +19,50 @@ export class AuthService {
             name: data.name,
             university: data.university,
             educationLevel: data.educationLevel,
-            phone: data.phone
+            phone: data.phone,
+            role: 'STUDENT'
         }
      });
      
      const { password, ...userWithoutPassword } = user;
      return userWithoutPassword;
+    }
+
+    async registerInstructor(data: any) {
+      const existingRequest = await this.prisma.instructorRequest.findUnique({
+        where: { email: data.email }
+      });
+
+      if (existingRequest) {
+        throw new ConflictException('An instructor registration request with this email already exists');
+      }
+
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: data.email }
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Email already registered');
+      }
+
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const instructorRequest = await this.prisma.instructorRequest.create({
+        data: {
+          email: data.email,
+          password: hashedPassword,
+          name: data.name,
+          expertise: data.expertise,
+          bio: data.bio,
+          phoneNumber: data.phoneNumber,
+          status: 'PENDING'
+        }
+      });
+
+      const { password, ...requestWithoutPassword } = instructorRequest;
+      return {
+        ...requestWithoutPassword,
+        message: 'Instructor registration request submitted. Awaiting admin approval.'
+      };
     }
 
     async login(data: any){

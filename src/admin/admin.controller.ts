@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuard
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminService } from './admin.service';
+import { ApproveInstructorDto } from './dto/approve-instructor.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -243,5 +244,36 @@ export class AdminController {
 	@ApiOperation({ summary: 'Delete a certificate' })
 	deleteCertificate(@Req() req: any, @Param('id') id: string) {
 		return this.adminService.deleteCertificate(req.user, id);
+	}
+
+	/**
+	 * INSTRUCTOR REQUESTS
+	 */
+	@Get('instructor-requests')
+	@ApiOperation({ summary: 'View all pending instructor applications' })
+	@ApiResponse({ status: 200, description: 'List of instructor requests' })
+	getInstructorRequests(@Req() req: any) {
+		return this.adminService.getInstructorRequests(req.user);
+	}
+
+	@Get('instructor-requests/:id')
+	@ApiOperation({ summary: 'View a specific instructor application' })
+	@ApiResponse({ status: 200, description: 'Instructor request details' })
+	getInstructorRequest(@Req() req: any, @Param('id') id: string) {
+		return this.adminService.getInstructorRequest(req.user, id);
+	}
+
+	@Patch('approve-instructor/:id')
+	@ApiOperation({ summary: 'Approve or reject instructor application' })
+	@ApiResponse({ status: 200, description: 'Instructor request processed' })
+	approveInstructor(@Req() req: any, @Param('id') id: string, @Body() body: ApproveInstructorDto) {
+		return this.adminService.approveInstructor(req.user, id, body);
+	}
+
+	@Delete('instructor-requests/:id')
+	@ApiOperation({ summary: 'Delete an instructor application' })
+	@ApiResponse({ status: 200, description: 'Instructor request deleted' })
+	deleteInstructorRequest(@Req() req: any, @Param('id') id: string) {
+		return this.adminService.deleteInstructorRequest(req.user, id);
 	}
 }

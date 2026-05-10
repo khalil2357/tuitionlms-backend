@@ -859,4 +859,137 @@ export class AdminService {
 
 		return this.prisma.certificate.delete({ where: { id: certificateId } });
 	}
+
+	/**
+	 * INSTRUCTOR REQUESTS
+	 */
+	async getInstructorRequests(actor: { role?: string }) {
+		this.assertAdmin(actor);
+
+		return this.prisma.instructorRequest.findMany({
+			select: {
+				id: true,
+				email: true,
+				name: true,
+				expertise: true,
+				bio: true,
+				phoneNumber: true,
+				status: true,
+				createdAt: true,
+				approvedAt: true,
+			},
+			orderBy: { createdAt: 'desc' },
+		});
+	}
+
+	async getInstructorRequest(actor: { role?: string }, requestId: string) {
+		this.assertAdmin(actor);
+		this.assertObjectId(requestId, 'instructor request');
+
+		const request = await this.prisma.instructorRequest.findUnique({
+			where: { id: requestId },
+			select: {
+				id: true,
+				email: true,
+				name: true,
+				expertise: true,
+				bio: true,
+				phoneNumber: true,
+				status: true,
+				rejectionReason: true,
+				createdAt: true,
+				approvedAt: true,
+			},
+		});
+
+		if (!request) {
+			throw new NotFoundException('Instructor request not found');
+		}
+
+		return request;
+	}
+
+	async approveInstructor(actor: any, requestId: string, data: any) {
+		this.assertAdmin(actor);
+		this.assertObjectId(requestId, 'instructor request');
+
+		const request = await this.prisma.instructorRequest.findUnique({
+			where: { id: requestId },
+		});
+
+		if (!request) {
+			throw new NotFoundException('Instructor request not found');
+		}
+
+		if (request.status !== 'PENDING') {
+			throw new BadRequestException('This request has already been processed');
+		}
+
+		if (data.approve) {
+			// Create user as instructor
+			const user = await this.prisma.user.create({
+				data: {
+					email: request.email,
+					password: request.password,
+					name: request.name,
+					role: 'INSTRUCTOR',
+					phone: request.phoneNumber,
+					bio: request.bio,
+					headline: request.expertise,
+					isVerified: true,
+				},
+			});
+
+			// Update request status to approved
+			await this.prisma.instructorRequest.update({
+				where: { id: requestId },
+				data: {
+					status: 'APPROVED',
+					approvedAt: new Date(),
+					approvedBy: actor.sub || null,
+				},
+			});
+
+			return {
+				message: 'Instructor approved and account created',
+				user: {
+					id: user.id,
+					email: user.email,
+					name: user.name,
+					role: user.role,
+				},
+			};
+		} else {
+			// Reject request
+			await this.prisma.instructorRequest.update({
+				where: { id: requestId },
+				data: {
+					status: 'REJECTED',
+					rejectionReason: data.rejectionReason || 'Application rejected by admin',
+				},
+			});
+
+			return {
+				message: 'Instructor application rejected',
+				requestId,
+				rejectionReason: data.rejectionReason,
+			};
+		}
+	}
+
+	async deleteInstructorRequest(actor: { role?: string }, requestId: string) {
+		this.assertAdmin(actor);
+		this.assertObjectId(requestId, 'instructor request');
+
+		const request = await this.prisma.instructorRequest.findUnique({
+			where: { id: requestId },
+			select: { id: true },
+		});
+
+		if (!request) {
+			throw new NotFoundException('Instructor request not found');
+		}
+
+		return this.prisma.instructorRequest.delete({ where: { id: requestId } });
+	}
 }

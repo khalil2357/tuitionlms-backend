@@ -13,10 +13,11 @@ import { AdminModule } from './admin/admin.module';
 import { ProgressModule } from './progress/progress.module';
 import { QuizModule } from './quiz/quiz.module';
 import { QuizResultModule } from './quiz-result/quiz-result.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, CoursesModule, LessonsModule, EnrollmentsModule, MailModule, AdminModule, ProgressModule, QuizModule, QuizResultModule],
+  imports: [PrismaModule, AuthModule, UsersModule, CoursesModule, LessonsModule, EnrollmentsModule, MailModule, AdminModule, ProgressModule, QuizModule, QuizResultModule, ReviewsModule],
   controllers: [AppController],
   providers: [AppService],
 })

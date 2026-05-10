@@ -5,7 +5,7 @@ import { CertificateService } from './certificate.service';
 
 @ApiTags('Certificates')
 @Controller('certificate')
-export class CertificateController {}
+export class CertificateController {
 	constructor(private readonly certificateService: CertificateService) {}
 
 	@Post()
@@ -56,3 +56,5 @@ export class CertificateController {}
 	remove(@Param('id') id: string) {
 		return this.certificateService.remove(id);
 	}
+
+}

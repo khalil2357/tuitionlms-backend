@@ -24,6 +24,12 @@ export class AdminController {
 		return this.adminService.listUsers(req.user);
 	}
 
+	@Post('users')
+	@ApiOperation({ summary: 'Create a new user' })
+	createUser(@Req() req: any, @Body() body: any) {
+		return this.adminService.createUser(req.user, body);
+	}
+
 	@Get('users/:id')
 	@ApiOperation({ summary: 'View a user' })
 	findUser(@Req() req: any, @Param('id') id: string) {
@@ -275,5 +281,51 @@ export class AdminController {
 	@ApiResponse({ status: 200, description: 'Instructor request deleted' })
 	deleteInstructorRequest(@Req() req: any, @Param('id') id: string) {
 		return this.adminService.deleteInstructorRequest(req.user, id);
+	}
+
+	/**
+	 * SECTIONS
+	 */
+	@Get('sections')
+	findSections(@Req() req: any, @Query('courseId') courseId?: string) {
+		return this.adminService.listSections(req.user, courseId);
+	}
+
+	@Post('sections')
+	createSection(@Req() req: any, @Body() body: any) {
+		return this.adminService.createSection(req.user, body);
+	}
+
+	@Patch('sections/:id')
+	updateSection(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+		return this.adminService.updateSection(req.user, id, body);
+	}
+
+	@Delete('sections/:id')
+	deleteSection(@Req() req: any, @Param('id') id: string) {
+		return this.adminService.deleteSection(req.user, id);
+	}
+
+	/**
+	 * QUESTIONS
+	 */
+	@Get('questions')
+	findQuestions(@Req() req: any, @Query('quizId') quizId?: string) {
+		return this.adminService.listQuestions(req.user, quizId);
+	}
+
+	@Post('questions')
+	createQuestion(@Req() req: any, @Body() body: any) {
+		return this.adminService.createQuestion(req.user, body);
+	}
+
+	@Patch('questions/:id')
+	updateQuestion(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+		return this.adminService.updateQuestion(req.user, id, body);
+	}
+
+	@Delete('questions/:id')
+	deleteQuestion(@Req() req: any, @Param('id') id: string) {
+		return this.adminService.deleteQuestion(req.user, id);
 	}
 }

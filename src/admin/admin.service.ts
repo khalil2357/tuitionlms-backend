@@ -1,10 +1,34 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EnrollmentStatus, CourseLevel, CourseStatus, Role, QuestionType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AdminService {
 	constructor(private prisma: PrismaService) {}
+
+	async createUser(actor: { role?: string }, data: any) {
+		this.assertAdmin(actor);
+		
+		const existingUser = await this.prisma.user.findUnique({
+			where: { email: data.email }
+		});
+
+		if (existingUser) {
+			throw new BadRequestException('Email already registered');
+		}
+
+		const hashedPassword = await bcrypt.hash(data.password || '123456', 10);
+
+		return this.prisma.user.create({
+			data: {
+				...data,
+				password: hashedPassword,
+				role: data.role || Role.STUDENT,
+				isActive: true
+			}
+		});
+	}
 
 	private assertAdmin(actor: { role?: string }) {
 		if (actor?.role !== 'ADMIN') {
@@ -970,9 +994,7 @@ export class AdminService {
 			});
 
 			return {
-				message: 'Instructor application rejected',
-				requestId,
-				rejectionReason: data.rejectionReason,
+				message: 'Instructor request rejected',
 			};
 		}
 	}
@@ -981,15 +1003,84 @@ export class AdminService {
 		this.assertAdmin(actor);
 		this.assertObjectId(requestId, 'instructor request');
 
-		const request = await this.prisma.instructorRequest.findUnique({
-			where: { id: requestId },
-			select: { id: true },
-		});
-
-		if (!request) {
-			throw new NotFoundException('Instructor request not found');
-		}
-
 		return this.prisma.instructorRequest.delete({ where: { id: requestId } });
+	}
+
+	/**
+	 * SECTION MANAGEMENT
+	 */
+	async listSections(actor: { role?: string }, courseId?: string) {
+		this.assertAdmin(actor);
+		return this.prisma.section.findMany({
+			where: courseId ? { courseId } : {},
+			include: { course: true, lessons: true },
+			orderBy: { order: 'asc' },
+		});
+	}
+
+	async createSection(actor: { role?: string }, data: any) {
+		this.assertAdmin(actor);
+		return this.prisma.section.create({
+			data: {
+				...data,
+				order: parseInt(data.order) || 0,
+			},
+		});
+	}
+
+	async updateSection(actor: { role?: string }, id: string, data: any) {
+		this.assertAdmin(actor);
+		return this.prisma.section.update({
+			where: { id },
+			data: {
+				...data,
+				order: data.order ? parseInt(data.order) : undefined,
+			},
+		});
+	}
+
+	async deleteSection(actor: { role?: string }, id: string) {
+		this.assertAdmin(actor);
+		return this.prisma.section.delete({ where: { id } });
+	}
+
+	/**
+	 * QUESTION MANAGEMENT
+	 */
+	async listQuestions(actor: { role?: string }, quizId?: string) {
+		this.assertAdmin(actor);
+		return this.prisma.question.findMany({
+			where: quizId ? { quizId } : {},
+			include: { quiz: true },
+			orderBy: { order: 'asc' },
+		});
+	}
+
+	async createQuestion(actor: { role?: string }, data: any) {
+		this.assertAdmin(actor);
+		return this.prisma.question.create({
+			data: {
+				...data,
+				order: parseInt(data.order) || 0,
+				points: parseInt(data.points) || 1,
+			},
+		});
+	}
+
+	async updateQuestion(actor: { role?: string }, id: string, data: any) {
+		this.assertAdmin(actor);
+		return this.prisma.question.update({
+			where: { id },
+			data: {
+				...data,
+				order: data.order ? parseInt(data.order) : undefined,
+				points: data.points ? parseInt(data.points) : undefined,
+			},
+		});
+	}
+
+	async deleteQuestion(actor: { role?: string }, id: string) {
+		this.assertAdmin(actor);
+		return this.prisma.question.delete({ where: { id } });
 	}
 }

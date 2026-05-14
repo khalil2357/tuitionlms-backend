@@ -521,6 +521,7 @@ export class AdminService {
 				videoUrl: payload.videoUrl,
 				duration: payload.duration != null ? parseInt(payload.duration.toString()) : 0,
 				order: payload.order != null ? parseInt(payload.order.toString()) : 0,
+				type: payload.type || 'VIDEO',
 				courseId: payload.courseId,
 				sectionId: payload.sectionId,
 				isPreview: payload.isPreview ?? false,
@@ -566,6 +567,7 @@ export class AdminService {
 			videoUrl: payload.videoUrl,
 			duration: payload.duration != null ? parseInt(payload.duration.toString()) : undefined,
 			order: payload.order != null ? parseInt(payload.order.toString()) : undefined,
+			type: payload.type,
 			sectionId: payload.sectionId,
 			isPreview: payload.isPreview,
 		};

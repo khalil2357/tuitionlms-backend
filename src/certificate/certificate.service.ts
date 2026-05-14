@@ -6,8 +6,8 @@ export class CertificateService {
 	constructor(private prisma: PrismaService) {}
 
 	private assertObjectId(id: string, resourceName: string) {
-		if (!/^[0-9a-fA-F]{24}$/.test(id)) {
-			throw new BadRequestException(`Invalid ${resourceName} id`);
+		if (!id) {
+			throw new BadRequestException(`${resourceName} id is required`);
 		}
 	}
 

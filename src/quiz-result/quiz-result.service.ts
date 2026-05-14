@@ -7,11 +7,11 @@ import { UpdateQuizResultDto } from './dto/update-quiz-result.dto';
 export class QuizResultService {
   constructor(private prisma: PrismaService) {}
 
-  private assertObjectId(id: string, resourceName: string) {
-    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
-      throw new BadRequestException(`Invalid ${resourceName} id`);
-    }
-  }
+	private assertObjectId(id: string, resourceName: string) {
+		if (!id) {
+			throw new BadRequestException(`${resourceName} id is required`);
+		}
+	}
 
   async create(createQuizResultDto: CreateQuizResultDto) {
     const studentId = createQuizResultDto.studentId;

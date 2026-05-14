@@ -7,6 +7,12 @@ import * as bcrypt from 'bcryptjs';
 export class AdminService {
 	constructor(private prisma: PrismaService) {}
 
+	private assertObjectId(id: string, resourceName: string) {
+		if (!id) {
+			throw new BadRequestException(`${resourceName} id is required`);
+		}
+	}
+
 	async createUser(actor: { role?: string }, data: any) {
 		this.assertAdmin(actor);
 		
@@ -23,6 +29,7 @@ export class AdminService {
 		return this.prisma.user.create({
 			data: {
 				...data,
+				id: data.id || undefined,
 				password: hashedPassword,
 				role: data.role || Role.STUDENT,
 				isActive: true
@@ -33,12 +40,6 @@ export class AdminService {
 	private assertAdmin(actor: { role?: string }) {
 		if (actor?.role !== 'ADMIN') {
 			throw new ForbiddenException('Admin access required');
-		}
-	}
-
-	private assertObjectId(id: string, resourceName: string) {
-		if (!/^[0-9a-fA-F]{24}$/.test(id)) {
-			throw new BadRequestException(`Invalid ${resourceName} id`);
 		}
 	}
 
@@ -236,21 +237,27 @@ export class AdminService {
 		this.assertObjectId(userId, 'user');
 		await this.ensureUserExists(userId);
 
+		const updateData: any = {
+			name: payload.name,
+			email: payload.email,
+			role: payload.role,
+			university: payload.university,
+			educationLevel: payload.educationLevel,
+			avatar: payload.avatar,
+			phone: payload.phone,
+			bio: payload.bio,
+			headline: payload.headline,
+			isActive: payload.isActive,
+			isVerified: payload.isVerified,
+		};
+
+		if (payload.password) {
+			updateData.password = await bcrypt.hash(payload.password, 10);
+		}
+
 		return this.prisma.user.update({
 			where: { id: userId },
-			data: {
-				name: payload.name,
-				email: payload.email,
-				role: payload.role,
-				university: payload.university,
-				educationLevel: payload.educationLevel,
-				avatar: payload.avatar,
-				phone: payload.phone,
-				bio: payload.bio,
-				headline: payload.headline,
-				isActive: payload.isActive,
-				isVerified: payload.isVerified,
-			},
+			data: updateData,
 			select: {
 				id: true,
 				name: true,

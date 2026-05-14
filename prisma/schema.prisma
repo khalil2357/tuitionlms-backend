@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  id              String           @id @default(cuid()) @map("_id")
   name            String
   email           String           @unique
   password        String
@@ -32,7 +32,7 @@ model User {
 }
 
 model Category {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid()) @map("_id")
   name        String   @unique
   description String?
   icon        String?
@@ -43,15 +43,15 @@ model Category {
 }
 
 model Course {
-  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  id               String           @id @default(cuid()) @map("_id")
   title            String
   description      String
   shortDescription String?
   slug             String           @unique
   instructor       User             @relation("Instructor", fields: [instructorId], references: [id], onDelete: Cascade)
-  instructorId     String           @db.ObjectId
+  instructorId     String          
   category         Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId       String           @db.ObjectId
+  categoryId       String          
   thumbnail        String?
   price            Float            @default(0)
   discountPrice    Float?
@@ -78,12 +78,12 @@ model Course {
 }
 
 model Section {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid()) @map("_id")
   title       String
   description String?
   order       Int
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId    String   @db.ObjectId
+  courseId    String  
   lessons     Lesson[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -92,7 +92,7 @@ model Section {
 }
 
 model Lesson {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  id          String           @id @default(cuid()) @map("_id")
   title       String
   description String?
   content     String
@@ -100,9 +100,9 @@ model Lesson {
   duration    Int              @default(0)
   order       Int
   course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId    String           @db.ObjectId
+  courseId    String          
   section     Section          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  sectionId   String           @db.ObjectId
+  sectionId   String          
   resources   LessonResource[]
   isPreview   Boolean          @default(false)
   createdAt   DateTime         @default(now())
@@ -113,23 +113,23 @@ model Lesson {
 }
 
 model LessonResource {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid()) @map("_id")
   title     String
   fileUrl   String
   fileType  String
   lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  lessonId  String   @db.ObjectId
+  lessonId  String  
   createdAt DateTime @default(now())
 
   @@index([lessonId])
 }
 
 model Enrollment {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  id          String           @id @default(cuid()) @map("_id")
   student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId   String           @db.ObjectId
+  studentId   String          
   course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId    String           @db.ObjectId
+  courseId    String          
   status      EnrollmentStatus @default(ACTIVE)
   progress    Int              @default(0)
   enrolledAt  DateTime         @default(now())
@@ -141,11 +141,11 @@ model Enrollment {
 }
 
 model Quiz {
-  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
+  id                 String       @id @default(cuid()) @map("_id")
   title              String
   description        String?
   course             Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId           String       @db.ObjectId
+  courseId           String      
   questions          Question[]
   results            QuizResult[]
   passingScore       Int          @default(70)
@@ -160,9 +160,9 @@ model Quiz {
 }
 
 model Question {
-  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  id            String           @id @default(cuid()) @map("_id")
   quiz          Quiz             @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  quizId        String           @db.ObjectId
+  quizId        String          
   type          QuestionType     @default(MULTIPLE_CHOICE)
   questionText  String
   order         Int
@@ -175,9 +175,9 @@ model Question {
 }
 
 model QuestionOption {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @default(cuid()) @map("_id")
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId String   @db.ObjectId
+  questionId String  
   text       String
   order      Int
 
@@ -185,11 +185,11 @@ model QuestionOption {
 }
 
 model QuizResult {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid()) @map("_id")
   student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId   String   @db.ObjectId
+  studentId   String  
   quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  quizId      String   @db.ObjectId
+  quizId      String  
   score       Int
   percentage  Float
   passed      Boolean
@@ -202,11 +202,11 @@ model QuizResult {
 }
 
 model CourseReview {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @default(cuid()) @map("_id")
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId   String   @db.ObjectId
+  courseId   String  
   reviewer   User     @relation("Reviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
-  reviewerId String   @db.ObjectId
+  reviewerId String  
   rating     Int
   title      String
   comment    String?
@@ -220,11 +220,11 @@ model CourseReview {
 }
 
 model CourseProgress {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  id               String   @id @default(cuid()) @map("_id")
   student          User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId        String   @db.ObjectId
+  studentId        String  
   course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId         String   @db.ObjectId
+  courseId         String  
   lessonsCompleted Int      @default(0)
   totalLessons     Int
   percentage       Float    @default(0)
@@ -237,9 +237,9 @@ model CourseProgress {
 }
 
 model Certificate {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  id             String   @id @default(cuid()) @map("_id")
   student        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId      String   @db.ObjectId
+  studentId      String  
   courseName     String
   certificateUrl String
   issuedAt       DateTime @default(now())
@@ -249,7 +249,7 @@ model Certificate {
 }
 
 model InstructorRequest {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @default(cuid()) @map("_id")
   email            String             @unique
   name             String
   password         String
@@ -258,7 +258,7 @@ model InstructorRequest {
   phoneNumber      String?
   status           ApprovalStatus     @default(PENDING)
   rejectionReason  String?
-  approvedBy       String?            @db.ObjectId
+  approvedBy       String?           
   approvedAt       DateTime?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt

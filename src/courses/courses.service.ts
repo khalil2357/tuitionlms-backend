@@ -225,5 +225,54 @@ export class CoursesService {
       },
     });
   }
+  async findBySlug(slug: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { slug },
+      include: {
+        instructor: {
+          select: { id: true, name: true, email: true, headline: true, avatar: true },
+        },
+        category: true,
+        sections: {
+          orderBy: { order: 'asc' },
+          include: {
+            lessons: {
+              orderBy: { order: 'asc' },
+              select: { id: true, title: true, duration: true, type: true, isPreview: true },
+            },
+          },
+        },
+        reviews: {
+          take: 10,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            reviewer: {
+              select: { id: true, name: true, avatar: true },
+            },
+          },
+        },
+        _count: {
+          select: { enrollments: true, reviews: true, sections: true },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    return course;
+  }
+
+  async listCategories() {
+    return this.prisma.category.findMany({
+      include: {
+        _count: {
+          select: { courses: { where: { isPublished: true } } },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
 }
 

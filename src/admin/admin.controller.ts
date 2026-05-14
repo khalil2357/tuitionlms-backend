@@ -144,6 +144,11 @@ export class AdminController {
 		return this.adminService.deleteLesson(req.user, id);
 	}
 
+	@Post('enrollments/manual')
+	manualEnroll(@Req() req: any, @Body() body: { studentId: string; courseId: string }) {
+		return this.adminService.manualEnroll(req.user, body);
+	}
+
 	@Get('enrollments')
 	@ApiOperation({ summary: 'View all enrollments' })
 	findEnrollments(@Req() req: any) {
@@ -327,5 +332,28 @@ export class AdminController {
 	@Delete('questions/:id')
 	deleteQuestion(@Req() req: any, @Param('id') id: string) {
 		return this.adminService.deleteQuestion(req.user, id);
+	}
+
+	/**
+	 * CATEGORIES
+	 */
+	@Get('categories')
+	findCategories(@Req() req: any) {
+		return this.adminService.listCategories(req.user);
+	}
+
+	@Post('categories')
+	createCategory(@Req() req: any, @Body() body: any) {
+		return this.adminService.createCategory(req.user, body);
+	}
+
+	@Patch('categories/:id')
+	updateCategory(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+		return this.adminService.updateCategory(req.user, id, body);
+	}
+
+	@Delete('categories/:id')
+	deleteCategory(@Req() req: any, @Param('id') id: string) {
+		return this.adminService.deleteCategory(req.user, id);
 	}
 }

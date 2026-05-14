@@ -51,70 +51,34 @@ export class AdminService {
 			.replace(/^-+|-+$/g, '');
 	}
 
-	private async ensureUserExists(userId: string) {
-		const user = await this.prisma.user.findUnique({
-			where: { id: userId },
-			select: { id: true },
-		});
-
-		if (!user) {
-			throw new NotFoundException('User not found');
-		}
+	private async ensureUserExists(id: string) {
+		const user = await this.prisma.user.findFirst({ where: { id } });
+		if (!user) throw new NotFoundException('User not found');
 	}
 
-	private async ensureCourseExists(courseId: string) {
-		const course = await this.prisma.course.findUnique({
-			where: { id: courseId },
-			select: { id: true },
-		});
-
-		if (!course) {
-			throw new NotFoundException('Course not found');
-		}
+	private async ensureCourseExists(id: string) {
+		const course = await this.prisma.course.findFirst({ where: { id } });
+		if (!course) throw new NotFoundException('Course not found');
 	}
 
-	private async ensureQuizExists(quizId: string) {
-		const quiz = await this.prisma.quiz.findUnique({
-			where: { id: quizId },
-			select: { id: true },
-		});
-
-		if (!quiz) {
-			throw new NotFoundException('Quiz not found');
-		}
+	private async ensureQuizExists(id: string) {
+		const quiz = await this.prisma.quiz.findFirst({ where: { id } });
+		if (!quiz) throw new NotFoundException('Quiz not found');
 	}
 
-	private async ensureLessonExists(lessonId: string) {
-		const lesson = await this.prisma.lesson.findUnique({
-			where: { id: lessonId },
-			select: { id: true },
-		});
-
-		if (!lesson) {
-			throw new NotFoundException('Lesson not found');
-		}
+	private async ensureLessonExists(id: string) {
+		const lesson = await this.prisma.lesson.findFirst({ where: { id } });
+		if (!lesson) throw new NotFoundException('Lesson not found');
 	}
 
-	private async ensureReviewExists(reviewId: string) {
-		const review = await this.prisma.courseReview.findUnique({
-			where: { id: reviewId },
-			select: { id: true },
-		});
-
-		if (!review) {
-			throw new NotFoundException('Review not found');
-		}
+	private async ensureReviewExists(id: string) {
+		const review = await this.prisma.courseReview.findFirst({ where: { id } });
+		if (!review) throw new NotFoundException('Review not found');
 	}
 
-	private async ensureCertificateExists(certificateId: string) {
-		const certificate = await this.prisma.certificate.findUnique({
-			where: { id: certificateId },
-			select: { id: true },
-		});
-
-		if (!certificate) {
-			throw new NotFoundException('Certificate not found');
-		}
+	private async ensureCertificateExists(id: string) {
+		const certificate = await this.prisma.certificate.findFirst({ where: { id } });
+		if (!certificate) throw new NotFoundException('Certificate not found');
 	}
 
 	async dashboard(actor: { role?: string }) {
@@ -160,7 +124,7 @@ export class AdminService {
 			}),
 		]);
 
-		const revenue = revenuesEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.course.price ?? 0), 0);
+		const revenue = revenuesEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.course?.price ?? 0), 0);
 
 		return {
 			totalUsers,
@@ -364,6 +328,11 @@ export class AdminService {
 
 		this.assertObjectId(payload.instructorId, 'instructor');
 		this.assertObjectId(payload.categoryId, 'category');
+		
+		if (!payload.title) {
+			throw new BadRequestException('Course title is required');
+		}
+
 		await this.ensureUserExists(payload.instructorId);
 
 		const category = await this.prisma.category.findUnique({
@@ -391,8 +360,8 @@ export class AdminService {
 				instructorId: payload.instructorId,
 				categoryId: payload.categoryId,
 				thumbnail: payload.thumbnail,
-				price: payload.price,
-				discountPrice: payload.discountPrice,
+				price: payload.price != null ? parseFloat(payload.price.toString()) : 0,
+				discountPrice: payload.discountPrice != null ? parseFloat(payload.discountPrice.toString()) : undefined,
 				currency: payload.currency ?? 'USD',
 				level: payload.level ?? CourseLevel.BEGINNER,
 				status: payload.status ?? CourseStatus.DRAFT,
@@ -444,8 +413,8 @@ export class AdminService {
 			instructorId: payload.instructorId,
 			categoryId: payload.categoryId,
 			thumbnail: payload.thumbnail,
-			price: payload.price,
-			discountPrice: payload.discountPrice,
+			price: payload.price != null ? parseFloat(payload.price.toString()) : undefined,
+			discountPrice: payload.discountPrice != null ? parseFloat(payload.discountPrice.toString()) : undefined,
 			currency: payload.currency,
 			level: payload.level,
 			status: payload.status,
@@ -550,8 +519,8 @@ export class AdminService {
 				description: payload.description,
 				content: payload.content,
 				videoUrl: payload.videoUrl,
-				duration: payload.duration,
-				order: payload.order,
+				duration: payload.duration != null ? parseInt(payload.duration.toString()) : 0,
+				order: payload.order != null ? parseInt(payload.order.toString()) : 0,
 				courseId: payload.courseId,
 				sectionId: payload.sectionId,
 				isPreview: payload.isPreview ?? false,
@@ -568,7 +537,7 @@ export class AdminService {
 		this.assertObjectId(lessonId, 'lesson');
 		await this.ensureLessonExists(lessonId);
 
-		const lesson = await this.prisma.lesson.findUnique({ where: { id: lessonId } });
+		const lesson = await this.prisma.lesson.findFirst({ where: { id: lessonId } });
 
 		if (!lesson) {
 			throw new NotFoundException('Lesson not found');
@@ -595,8 +564,8 @@ export class AdminService {
 			description: payload.description,
 			content: payload.content,
 			videoUrl: payload.videoUrl,
-			duration: payload.duration,
-			order: payload.order,
+			duration: payload.duration != null ? parseInt(payload.duration.toString()) : undefined,
+			order: payload.order != null ? parseInt(payload.order.toString()) : undefined,
 			sectionId: payload.sectionId,
 			isPreview: payload.isPreview,
 		};
@@ -624,44 +593,57 @@ export class AdminService {
 	async listEnrollments(actor: { role?: string }) {
 		this.assertAdmin(actor);
 
-		return this.prisma.enrollment.findMany({
-			include: {
-				student: { select: { id: true, name: true, email: true, avatar: true } },
-				course: {
-					include: {
-						instructor: { select: { id: true, name: true, email: true } },
-						category: true,
-					},
+		const [enrollments, students, courses] = await Promise.all([
+			this.prisma.enrollment.findMany({ orderBy: { enrolledAt: 'desc' } }),
+			this.prisma.user.findMany({ select: { id: true, name: true, email: true, avatar: true } }),
+			this.prisma.course.findMany({
+				include: {
+					instructor: { select: { id: true, name: true, email: true } },
+					category: true,
 				},
-			},
-			orderBy: { enrolledAt: 'desc' },
-		});
+			}),
+		]);
+
+		return enrollments.map((e) => ({
+			...e,
+			student: students.find((s) => s.id === e.studentId) || null,
+			course: courses.find((c) => c.id === e.courseId) || null,
+		}));
 	}
 
 	async getEnrollment(actor: { role?: string }, enrollmentId: string) {
 		this.assertAdmin(actor);
 		this.assertObjectId(enrollmentId, 'enrollment');
 
-		const enrollment = await this.prisma.enrollment.findUnique({
-			where: { id: enrollmentId },
-			include: {
-				student: { select: { id: true, name: true, email: true, avatar: true } },
-				course: true,
-			},
-		});
+		const enrollment = await this.prisma.enrollment.findFirst({ where: { id: enrollmentId } });
+		if (!enrollment) throw new NotFoundException('Enrollment not found');
 
-		if (!enrollment) {
-			throw new NotFoundException('Enrollment not found');
-		}
+		const [student, course] = await Promise.all([
+			this.prisma.user.findFirst({
+				where: { id: enrollment.studentId },
+				select: { id: true, name: true, email: true, avatar: true },
+			}),
+			this.prisma.course.findFirst({
+				where: { id: enrollment.courseId },
+				include: {
+					instructor: { select: { id: true, name: true, email: true } },
+					category: true,
+				},
+			}),
+		]);
 
-		return enrollment;
+		return {
+			...enrollment,
+			student: student || null,
+			course: course || null,
+		};
 	}
 
 	async updateEnrollmentStatus(actor: { role?: string }, enrollmentId: string, status: EnrollmentStatus) {
 		this.assertAdmin(actor);
 		this.assertObjectId(enrollmentId, 'enrollment');
 
-		const enrollment = await this.prisma.enrollment.findUnique({ where: { id: enrollmentId } });
+		const enrollment = await this.prisma.enrollment.findFirst({ where: { id: enrollmentId } });
 
 		if (!enrollment) {
 			throw new NotFoundException('Enrollment not found');
@@ -680,7 +662,7 @@ export class AdminService {
 		this.assertAdmin(actor);
 		this.assertObjectId(enrollmentId, 'enrollment');
 
-		const enrollment = await this.prisma.enrollment.findUnique({ where: { id: enrollmentId } });
+		const enrollment = await this.prisma.enrollment.findFirst({ where: { id: enrollmentId } });
 
 		if (!enrollment) {
 			throw new NotFoundException('Enrollment not found');
@@ -1089,5 +1071,89 @@ export class AdminService {
 	async deleteQuestion(actor: { role?: string }, id: string) {
 		this.assertAdmin(actor);
 		return this.prisma.question.delete({ where: { id } });
+	}
+
+	/**
+	 * CATEGORY MANAGEMENT
+	 */
+	async listCategories(actor: { role?: string }) {
+		this.assertAdmin(actor);
+		return this.prisma.category.findMany({
+			include: { _count: { select: { courses: true } } },
+			orderBy: { name: 'asc' },
+		});
+	}
+
+	async createCategory(actor: { role?: string }, data: any) {
+		this.assertAdmin(actor);
+		return this.prisma.category.create({
+			data: {
+				name: data.name,
+				description: data.description,
+				icon: data.icon,
+				slug: data.slug || this.slugify(data.name),
+			},
+		});
+	}
+
+	async updateCategory(actor: { role?: string }, id: string, data: any) {
+		this.assertAdmin(actor);
+		return this.prisma.category.update({
+			where: { id },
+			data: {
+				name: data.name,
+				description: data.description,
+				icon: data.icon,
+				slug: data.slug || (data.name ? this.slugify(data.name) : undefined),
+			},
+		});
+	}
+
+	async deleteCategory(actor: { role?: string }, id: string) {
+		this.assertAdmin(actor);
+		return this.prisma.category.delete({ where: { id } });
+	}
+
+	/**
+	 * ENROLLMENTS
+	 */
+	async manualEnroll(actor: { role?: string }, payload: { studentId: string; courseId: string }) {
+		this.assertAdmin(actor);
+		this.assertObjectId(payload.studentId, 'student');
+		this.assertObjectId(payload.courseId, 'course');
+
+		const allUsers = await this.prisma.user.findMany({ select: { id: true, name: true, email: true } });
+		const student = allUsers.find(u => u.id === payload.studentId);
+		if (!student) throw new NotFoundException(`Student with ID ${payload.studentId} not found in verified user list`);
+
+		const allCourses = await this.prisma.course.findMany({ select: { id: true, title: true } });
+		const course = allCourses.find(c => c.id === payload.courseId);
+		if (!course) throw new NotFoundException(`Course with ID ${payload.courseId} not found in verified course list`);
+
+		const existing = await this.prisma.enrollment.findFirst({
+			where: {
+				studentId: payload.studentId,
+				courseId: payload.courseId,
+			},
+		});
+
+		if (existing) {
+			throw new BadRequestException('User already enrolled');
+		}
+
+		const enrollment = await this.prisma.enrollment.create({
+			data: {
+				studentId: payload.studentId,
+				courseId: payload.courseId,
+				status: EnrollmentStatus.ACTIVE,
+				enrolledAt: new Date(),
+			},
+		});
+
+		return {
+			...enrollment,
+			student: { id: student.id, name: student.name, email: student.email },
+			course: { id: course.id, title: course.title },
+		};
 	}
 }

@@ -126,9 +126,9 @@ model LessonResource {
 
 model Enrollment {
   id          String           @id @default(cuid()) @map("_id")
-  student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student     User?            @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId   String          
-  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course?          @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId    String          
   status      EnrollmentStatus @default(ACTIVE)
   progress    Int              @default(0)

@@ -27,6 +27,18 @@ export class CoursesController {
     return this.coursesService.findAll(parseInt(page), parseInt(limit));
   }
 
+  @Get('categories')
+  @ApiOperation({ summary: 'Get all categories with course counts' })
+  findCategories() {
+    return this.coursesService.listCategories();
+  }
+
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get course details by slug' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.coursesService.findBySlug(slug);
+  }
+
   @Get('instructor/my-courses')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

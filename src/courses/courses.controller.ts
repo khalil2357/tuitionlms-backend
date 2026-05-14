@@ -23,8 +23,12 @@ export class CoursesController {
   @Get()
   @ApiOperation({ summary: 'Get all published courses' })
   @ApiResponse({ status: 200, description: 'Returns list of courses' })
-  findAll(@Query('page') page: string = '1', @Query('limit') limit: string = '10') {
-    return this.coursesService.findAll(parseInt(page), parseInt(limit));
+  findAll(
+    @Query('page') page: string = '1', 
+    @Query('limit') limit: string = '10',
+    @Query('categoryId') categoryId?: string
+  ) {
+    return this.coursesService.findAll(parseInt(page), parseInt(limit), categoryId);
   }
 
   @Get('categories')

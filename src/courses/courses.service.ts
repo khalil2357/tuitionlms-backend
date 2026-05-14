@@ -34,12 +34,17 @@ export class CoursesService {
     });
   }
 
-  async findAll(page: number = 1, limit: number = 10) {
+  async findAll(page: number = 1, limit: number = 10, categoryId?: string) {
     const skip = (page - 1) * limit;
     
+    const where: any = { isPublished: true };
+    if (categoryId && categoryId !== 'all') {
+      where.categoryId = categoryId;
+    }
+
     const [courses, total] = await Promise.all([
       this.prisma.course.findMany({
-        where: { isPublished: true },
+        where,
         skip,
         take: limit,
         include: {
@@ -48,12 +53,12 @@ export class CoursesService {
           },
           category: true,
           _count: {
-            select: { enrollments: true },
+            select: { enrollments: true, sections: true, lessons: true },
           },
         },
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.course.count({ where: { isPublished: true } }),
+      this.prisma.course.count({ where }),
     ]);
 
     return {

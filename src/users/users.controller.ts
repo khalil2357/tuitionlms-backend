@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -27,7 +28,7 @@ export class UsersController {
     @ApiResponse({ status: 200, description: 'User profile updated successfully' })
     UpdateUser(
         @Req() req: any,
-        @Body() payload: any
+        @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })) payload: UpdateUserDto
     ){
         return this.usersService.updateUser(req.user.id, payload);
     }

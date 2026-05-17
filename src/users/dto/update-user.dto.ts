@@ -1,8 +1,6 @@
-import { ApiOAuth2} from "@nestjs/swagger";
-import { EducationLevel } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
-import { IsOptional } from "class-validator/types/decorator/common/IsOptional";
+import { IsString, IsOptional } from "class-validator";
+import { EducationLevel } from "@prisma/client";
 export class UpdateUserDto {
     
     @ApiProperty({ description: 'User full name', example: 'John Doe', required: false })
